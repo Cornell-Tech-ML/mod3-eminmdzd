@@ -315,36 +315,52 @@ def _tensor_matrix_multiply(
         a_shape[-1] == b_shape[-2]
     ), "Incompatible dimensions for matrix multiplication."
 
-    # Dimensions
-    batch_size = out_shape[0] if len(out_shape) == 3 else 1
+    # Determine batch dimensions
+    batch_dim = max(len(out_shape) - 2, 0)
+    batch_shape = out_shape[:batch_dim]
+    batch_size = 1
+    for size in batch_shape:
+        batch_size *= size
     m, n, k = out_shape[-2], out_shape[-1], a_shape[-1]
 
-    # Precompute batch strides for out, a, and b
-    a_batch_stride = a_strides[0] if len(a_shape) == 3 else 0
-    b_batch_stride = b_strides[0] if len(b_shape) == 3 else 0
-    out_batch_stride = out_strides[0] if len(out_shape) == 3 else 0
+    # Function to compute the batch offset
+    def get_batch_offset(batch_index, shape, strides):
+        index = np.zeros(len(shape), dtype=np.int32)
+        to_index(batch_index, shape, index)
+        offset = index_to_position(index, strides)
+        return offset
 
-    # Perform the matrix multiplication
-    for batch in prange(batch_size):
+    # Parallelize over batch indices
+    for batch_index in prange(batch_size):
+        # Compute batch offsets
+        a_batch_offset = (
+            get_batch_offset(batch_index, a_shape[:batch_dim], a_strides[:batch_dim])
+            if len(a_shape) > 2
+            else 0
+        )
+        b_batch_offset = (
+            get_batch_offset(batch_index, b_shape[:batch_dim], b_strides[:batch_dim])
+            if len(b_shape) > 2
+            else 0
+        )
+        out_batch_offset = (
+            get_batch_offset(
+                batch_index, out_shape[:batch_dim], out_strides[:batch_dim]
+            )
+            if len(out_shape) > 2
+            else 0
+        )
+
         for i in range(m):
             for j in range(n):
-                # Initialize local accumulator
                 acc = 0.0
                 for kk in range(k):
-                    # Calculate the linear index for each element in a and b
-                    a_index = (
-                        batch * a_batch_stride + i * a_strides[-2] + kk * a_strides[-1]
-                    )
-                    b_index = (
-                        batch * b_batch_stride + kk * b_strides[-2] + j * b_strides[-1]
-                    )
-                    acc += a_storage[a_index] * b_storage[b_index]
+                    a_pos = a_batch_offset + i * a_strides[-2] + kk * a_strides[-1]
+                    b_pos = b_batch_offset + kk * b_strides[-2] + j * b_strides[-1]
+                    acc += a_storage[a_pos] * b_storage[b_pos]
 
-                # Compute the output index and store result
-                out_index = (
-                    batch * out_batch_stride + i * out_strides[-2] + j * out_strides[-1]
-                )
-                out[out_index] = acc
+                out_pos = out_batch_offset + i * out_strides[-2] + j * out_strides[-1]
+                out[out_pos] = acc
 
 
 tensor_matrix_multiply = njit(_tensor_matrix_multiply, parallel=True)
