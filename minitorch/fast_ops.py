@@ -30,6 +30,18 @@ Fn = TypeVar("Fn")
 
 
 def njit(fn: Fn, **kwargs: Any) -> Fn:
+    """JIT-compiles a function with Numba, applying inline optimization by default.
+
+    Args:
+    ----
+        fn (Callable): The function to be JIT-compiled.
+        **kwargs (Any): Additional keyword arguments to customize the compilation.
+
+    Returns:
+    -------
+        Callable: The JIT-compiled function with inline optimization.
+
+    """
     return _njit(inline="always", **kwargs)(fn)  # type: ignore
 
 
@@ -323,8 +335,21 @@ def _tensor_matrix_multiply(
         batch_size *= size
     m, n, k = out_shape[-2], out_shape[-1], a_shape[-1]
 
-    # Function to compute the batch offset
-    def get_batch_offset(batch_index, shape, strides):
+    def get_batch_offset(batch_index: int, shape: Shape, strides: Strides) -> int:
+        """Calculate the batch offset for a specific batch index in a tensor,
+        based on the shape and strides of the tensor.
+
+        Args:
+        ----
+            batch_index (int): The index of the batch.
+            shape (Shape): The shape of the tensor up to the batch dimensions.
+            strides (Strides): The strides for the tensor.
+
+        Returns:
+        -------
+            int: The linear offset in the storage corresponding to the batch index.
+
+        """
         index = np.zeros(len(shape), dtype=np.int32)
         to_index(batch_index, shape, index)
         offset = index_to_position(index, strides)
