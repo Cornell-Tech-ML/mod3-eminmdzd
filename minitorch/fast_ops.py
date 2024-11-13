@@ -174,26 +174,18 @@ def tensor_map(
         )
 
         if stride_aligned:
-            # Directly apply `fn` without computing indices if strides align
             for i in prange(len(out)):
                 out[i] = fn(in_storage[i])
         else:
-            # Use helper functions to handle indexing and broadcasting
-            out_index = np.zeros(len(out_shape), dtype=np.int32)
-            in_index = np.zeros(len(in_shape), dtype=np.int32)
-
             for ordinal in prange(len(out)):
-                # Convert ordinal to multidimensional index in the output shape
+                # Move the declarations inside the loop
+                out_index = np.zeros(len(out_shape), dtype=np.int32)
+                in_index = np.zeros(len(in_shape), dtype=np.int32)
+
                 to_index(ordinal, out_shape, out_index)
-
-                # Broadcast the output index to match input tensor shape
                 broadcast_index(out_index, out_shape, in_shape, in_index)
-
-                # Calculate linear positions for `out` and `in_storage`
                 out_pos = index_to_position(out_index, out_strides)
                 in_pos = index_to_position(in_index, in_strides)
-
-                # Apply the function and store the result
                 out[out_pos] = fn(in_storage[in_pos])
 
     return njit(_map, parallel=True)
@@ -241,29 +233,21 @@ def tensor_zip(
         )
 
         if stride_aligned:
-            # Directly apply `fn` without computing indices if strides align
             for i in prange(len(out)):
                 out[i] = fn(a_storage[i], b_storage[i])
         else:
-            # Use helper functions for indexing and broadcasting
-            out_index = np.zeros(len(out_shape), dtype=np.int32)
-            a_index = np.zeros(len(a_shape), dtype=np.int32)
-            b_index = np.zeros(len(b_shape), dtype=np.int32)
-
             for ordinal in prange(len(out)):
-                # Convert ordinal to multidimensional index in the output shape
-                to_index(ordinal, out_shape, out_index)
+                # Move the declarations inside the loop
+                out_index = np.zeros(len(out_shape), dtype=np.int32)
+                a_index = np.zeros(len(a_shape), dtype=np.int32)
+                b_index = np.zeros(len(b_shape), dtype=np.int32)
 
-                # Broadcast `out_index` to align with `a_shape` and `b_shape`
+                to_index(ordinal, out_shape, out_index)
                 broadcast_index(out_index, out_shape, a_shape, a_index)
                 broadcast_index(out_index, out_shape, b_shape, b_index)
-
-                # Calculate linear positions for `out`, `a_storage`, and `b_storage`
                 out_pos = index_to_position(out_index, out_strides)
                 a_pos = index_to_position(a_index, a_strides)
                 b_pos = index_to_position(b_index, b_strides)
-
-                # Apply the function and store the result
                 out[out_pos] = fn(a_storage[a_pos], b_storage[b_pos])
 
     return njit(_zip, parallel=True)
@@ -301,12 +285,11 @@ def tensor_reduce(
     ) -> None:
         reduce_size = a_shape[reduce_dim]
 
-        out_index = np.zeros(MAX_DIMS, dtype=np.int32)  # Buffer for indices
-
-        for ordinal in prange(len(out)):  # Parallelize outer loop
+        for ordinal in prange(len(out)):
+            # Move the declaration inside the loop
+            out_index = np.zeros(MAX_DIMS, dtype=np.int32)
             to_index(ordinal, out_shape, out_index)
             o = index_to_position(out_index, out_strides)
-            # Local accumulator to avoid non-local access
             acc = out[o]
             for s in range(reduce_size):
                 out_index[reduce_dim] = s
