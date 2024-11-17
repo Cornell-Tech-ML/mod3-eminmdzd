@@ -41,18 +41,24 @@ Points: 50 <br />
 Hidden size: 100 <br />
 Learning rate: 0.05 <br />
 Epochs: 500 <br />
-Time per epoch:  <br />
+Time per epoch: 1.89s <br />
+
+<img width="786" alt="Screenshot 2024-11-17 at 12 58 36 AM" src="https://github.com/user-attachments/assets/aff314f3-bcd7-4bdf-b5ba-7bece6da4fb7">
 
 ## Split
 Points: 50 <br />
 Hidden size: 100 <br />
 Learning rate: 0.05 <br />
 Epochs: 500 <br />
-Time per epoch:  <br />
+Time per epoch: ~1.88s <br />
+
+<img width="808" alt="split_gpu" src="https://github.com/user-attachments/assets/fe12bf41-6ed1-4f1f-ad0d-93ad54e552bd">
 
 ## XOR
 Points: 50 <br />
 Hidden size: 100 <br />
 Learning rate: 0.05 <br />
 Epochs: 500 <br />
-Time per epoch:  <br />
+Time per epoch: 1.9327s <br />
+
+<img width="720" alt="Screenshot 2024-11-17 at 1 17 14 AM" src="https://github.com/user-attachments/assets/eb78e290-4cc1-4725-a888-411b182adb47">
