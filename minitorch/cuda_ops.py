@@ -6,7 +6,6 @@ from typing import Callable, Optional, TypeVar, Any
 import numba
 from numba import cuda
 from numba.cuda import jit as _jit
-from numba.cuda.simulator import pinned
 from .tensor import Tensor
 from .tensor_data import (
     MAX_DIMS,
@@ -30,11 +29,13 @@ FakeCUDAKernel = Any
 Fn = TypeVar("Fn")
 
 
-def device_jit(fn: Fn, **kwargs) -> Fn:
+def device_jit(fn: Fn, **kwargs) -> Fn:  # noqa: ANN003
+    """Wrapper for JIT compilation to the device for CUDA operations."""
     return _jit(device=True, **kwargs)(fn)  # type: ignore
 
 
-def jit(fn, **kwargs) -> FakeCUDAKernel:
+def jit(fn, **kwargs) -> FakeCUDAKernel:  # noqa: ANN001, ANN003
+    """JIT wrapper for CUDA kernels."""
     return _jit(**kwargs)(fn)  # type: ignore
 
 
@@ -68,6 +69,7 @@ class CudaOps(TensorOps):
 
     @staticmethod
     def zip(fn: Callable[[float, float], float]) -> Callable[[Tensor, Tensor], Tensor]:
+        """Apply a binary function `fn` element-wise to two tensors."""
         cufn: Callable[[float, float], float] = device_jit(fn)
         f = tensor_zip(cufn)
 
@@ -87,6 +89,7 @@ class CudaOps(TensorOps):
     def reduce(
         fn: Callable[[float, float], float], start: float = 0.0
     ) -> Callable[[Tensor, int], Tensor]:
+        """Apply a reduction function `fn` along a specified dimension."""
         cufn: Callable[[float, float], float] = device_jit(fn)
         f = tensor_reduce(cufn)
 
@@ -107,6 +110,7 @@ class CudaOps(TensorOps):
 
     @staticmethod
     def matrix_multiply(a: Tensor, b: Tensor) -> Tensor:
+        """Perform matrix multiplication on tensors `a` and `b`."""
         # Make these always be a 3 dimensional multiply
         both_2d = 0
         if len(a.shape) == 2:
@@ -197,10 +201,13 @@ def tensor_zip(
       fn_zip(out, ...)
 
     Args:
+    ----
         fn: function mappings two floats to float to apply.
 
     Returns:
+    -------
         Tensor zip function.
+
     """
 
     def _zip(
@@ -237,7 +244,7 @@ def tensor_zip(
 
 
 def _sum_practice(out: Storage, a: Storage, size: int) -> None:
-    """This is a practice sum kernel to prepare for reduce.
+    r"""A practice sum kernel to prepare for reduce.
 
     Given an array of length $n$ and out of size $n // \text{blockDIM}$
     it should sum up each blockDim values into an out cell.
@@ -288,6 +295,18 @@ jit_sum_practice = cuda.jit()(_sum_practice)
 
 
 def sum_practice(a: Tensor) -> TensorData:
+    """Practice kernel to perform summation of tensor elements using shared memory in CUDA.
+
+    Given an array of length `n` and output of size `n // blockDim`,
+    it will sum up elements within each block and write to output.
+
+    Args:
+    ----
+        out (Storage): Storage for output tensor.
+        a (Storage): Storage for input tensor.
+        size (int): Length of input tensor `a`.
+
+    """
     (size,) = a.shape
     threadsperblock = THREADS_PER_BLOCK
     blockspergrid = (size // THREADS_PER_BLOCK) + 1
@@ -373,7 +392,7 @@ def tensor_reduce(
 
 
 def _mm_practice(out: Storage, a: Storage, b: Storage, size: int) -> None:
-    """This is a practice square MM kernel to prepare for matmul.
+    """Practice square MM kernel to prepare for matmul.
 
     Given a storage `out` and two storage `a` and `b`. Where we know
     both are shape [size, size] with strides [size, 1].
@@ -432,6 +451,18 @@ jit_mm_practice = jit(_mm_practice)
 
 
 def mm_practice(a: Tensor, b: Tensor) -> TensorData:
+    """Practice kernel for matrix multiplication using shared memory in CUDA.
+
+    This kernel performs matrix multiplication for two square matrices `a` and `b` with a size smaller than 32.
+
+    Args:
+    ----
+        out (Storage): Storage for output matrix.
+        a (Storage): Storage for input matrix `a`.
+        b (Storage): Storage for input matrix `b`.
+        size (int): Size of the square matrices.
+
+    """
     (size, _) = a.shape
     threadsperblock = (THREADS_PER_BLOCK, THREADS_PER_BLOCK)
     blockspergrid = 1
@@ -455,8 +486,7 @@ def _tensor_matrix_multiply(
     b_shape: Shape,
     b_strides: Strides,
 ) -> None:
-    """
-    CUDA tensor matrix multiply function with optimized memory access.
+    """CUDA tensor matrix multiply function with optimized memory access.
     Handles broadcasting and batch matrix multiplication correctly.
     """
     BLOCK_DIM = 32
