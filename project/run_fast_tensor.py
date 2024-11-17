@@ -1,6 +1,7 @@
 import random
 import numba
 import minitorch
+import time  # Import the time module
 
 datasets = minitorch.datasets
 FastTensorBackend = minitorch.TensorBackend(minitorch.FastOps)
@@ -63,8 +64,10 @@ class FastTrain:
         optim = minitorch.SGD(self.model.parameters(), learning_rate)
         BATCH = 10
         losses = []
+        epoch_times = []  # List to store epoch durations
 
         for epoch in range(max_epochs):
+            start_time = time.time()  # Start timing the epoch
             total_loss = 0.0
             c = list(zip(data.X, data.y))
             random.shuffle(c)
@@ -87,14 +90,22 @@ class FastTrain:
                 optim.step()
 
             losses.append(total_loss)
+            epoch_time = time.time() - start_time  # Calculate the epoch duration
+            epoch_times.append(epoch_time)  # Store the epoch time
+
             # Logging
-            if epoch % 10 == 0 or epoch == max_epochs:
+            if epoch % 10 == 0 or epoch == max_epochs - 1:
                 X = minitorch.tensor(data.X, backend=self.backend)
                 y = minitorch.tensor(data.y, backend=self.backend)
                 out = self.model.forward(X).view(y.shape[0])
                 y2 = minitorch.tensor(data.y)
                 correct = int(((out.detach() > 0.5) == y2).sum()[0])
                 log_fn(epoch, total_loss, correct, losses)
+                print(f"Epoch time: {epoch_time:.4f} seconds")  # Print the epoch time
+
+        # Calculate and print the average epoch time
+        avg_time = sum(epoch_times) / len(epoch_times)
+        print(f"Average epoch time: {avg_time:.4f} seconds")
 
 
 if __name__ == "__main__":
