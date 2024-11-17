@@ -1,32 +1,30 @@
-# MiniTorch Module 3
+# CPU
+## Simple
+Points: 50 <br />
+Hidden size: 100 <br />
+Learning rate: 0.05 <br />
+Epochs: 500 <br />
+Time per epoch: 0.078s <br />
 
-<img src="https://minitorch.github.io/minitorch.svg" width="50%">
-
-* Docs: https://minitorch.github.io/
-
-* Overview: https://minitorch.github.io/module3.html
+<img width="432" alt="Screenshot 2024-11-16 at 11 09 25 PM" src="https://github.com/user-attachments/assets/63db5d22-f6e8-436a-b7b9-cce3ebeb28af">
 
 
-You will need to modify `tensor_functions.py` slightly in this assignment.
+## Split
+Points: 50 <br />
+Hidden size: 100 <br />
+Learning rate: 0.05 <br />
+Epochs: 500 <br />
+Time per epoch: 0.067s <br />
 
-* Tests:
+<img width="387" alt="Screenshot 2024-11-16 at 11 21 09 PM" src="https://github.com/user-attachments/assets/cdbd20e4-8499-4265-b30d-ff4ce6a345ee">
 
-```
-python run_tests.py
-```
+<br />
 
-* Note:
+## XOR
+Points: 50 <br />
+Hidden size: 100 <br />
+Learning rate: 0.05 <br />
+Epochs: 500 <br />
+Time per epoch: 0.069s <br />
 
-Several of the tests for this assignment will only run if you are on a GPU machine and will not
-run on github's test infrastructure. Please follow the instructions to setup up a colab machine
-to run these tests.
-
-This assignment requires the following files from the previous assignments. You can get these by running
-
-```bash
-python sync_previous_module.py previous-module-dir current-module-dir
-```
-
-The files that will be synced are:
-
-        minitorch/tensor_data.py minitorch/tensor_functions.py minitorch/tensor_ops.py minitorch/operators.py minitorch/scalar.py minitorch/scalar_functions.py minitorch/module.py minitorch/autodiff.py minitorch/module.py project/run_manual.py project/run_scalar.py project/run_tensor.py minitorch/operators.py minitorch/module.py minitorch/autodiff.py minitorch/tensor.py minitorch/datasets.py minitorch/testing.py minitorch/optim.py
+<img width="390" alt="Screenshot 2024-11-16 at 11 33 25 PM" src="https://github.com/user-attachments/assets/26e10b1a-4cda-47ee-ae3b-7cc58e7b902f">
