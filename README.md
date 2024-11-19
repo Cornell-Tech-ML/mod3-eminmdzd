@@ -62,3 +62,26 @@ Epochs: 500 <br />
 Time per epoch: 1.9327s <br />
 
 <img width="720" alt="Screenshot 2024-11-17 at 1 17 14 AM" src="https://github.com/user-attachments/assets/eb78e290-4cc1-4725-a888-411b182adb47">
+
+# CPU - Big
+## Simple
+Points: 150 <br />
+Hidden size: 200 <br />
+Learning rate: 0.05 <br />
+Epochs: 500 <br />
+Time per epoch: 0.335s <br />
+
+<img width="453" alt="Screenshot 2024-11-17 at 1 25 21 AM" src="https://github.com/user-attachments/assets/fb9d5f73-c8a0-47ac-a7df-ae6e48ca407d">
+
+# GPU - Big
+## Simple
+Points: 150 <br />
+Hidden size: 200 <br />
+Learning rate: 0.05 <br />
+Epochs: 500 <br />
+Time per epoch: 6.0537s <br />
+
+<img width="589" alt="Screenshot 2024-11-17 at 2 20 22 AM" src="https://github.com/user-attachments/assets/daca43ec-3e6a-4502-9708-4722394e6487">
+
+
+
