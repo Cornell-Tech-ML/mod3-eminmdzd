@@ -84,4 +84,12 @@ Time per epoch: 6.0537s <br />
 <img width="589" alt="Screenshot 2024-11-17 at 2 20 22 AM" src="https://github.com/user-attachments/assets/daca43ec-3e6a-4502-9708-4722394e6487">
 
 
+# GPU vs FastBackend comparison
+
+This graph was generated based on the [timing code](https://gist.github.com/justinchiu/e153cbfa667ee8212c5fe40e12252c8a) provided by TA on the [edstem](https://edstem.org/us/courses/62856/discussion/5735692)
+
+![Unknown](https://github.com/user-attachments/assets/ee896213-36f7-471c-a97e-718a3c4d6600)
+
+
+
 
